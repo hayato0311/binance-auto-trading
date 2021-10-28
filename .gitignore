@@ -1,0 +1,16 @@
+# dirs
+__pycache__/
+private/
+child_orders/
+execute_history/
+profit/
+volume/
+logs/
+
+lambda/
+python/
+
+
+# files
+.env
+*.zip

@@ -1,0 +1,17 @@
+binance-connector==1.6.0
+boto3==1.17.18
+botocore==1.20.18
+certifi==2020.12.5
+chardet==4.0.0
+idna==2.10
+jmespath==0.10.0
+numpy==1.20.1
+pandas==1.2.3
+pathlib==1.0.1
+python-dateutil==2.8.1
+python-dotenv==0.15.0
+pytz==2021.1
+requests==2.25.1
+s3transfer==0.3.4
+six==1.15.0
+urllib3==1.26.3
