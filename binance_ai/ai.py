@@ -362,7 +362,7 @@ class AI:
                     )
 
             logger.info(
-                f'[{self.product_code} {term} {child_order_cycle} {same_category_order["price"].values[0]} {same_category_order["size"].values[0]}] 買い注文をキャンセルします。'
+                f'[{self.product_code} {term} {child_order_cycle} {same_category_order.index[0]} {same_category_order["price"].values[0]} {same_category_order["size"].values[0]}] 買い注文をキャンセルします。'
             )
             self._cancel(
                 term=term,
