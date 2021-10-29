@@ -268,7 +268,7 @@ class AI:
             # 1 - local_prices['low'] / global_prices['high']) ** 2 +
             # self.max_buy_prices_rate[term]
 
-        price = int(local_prices['low'] * price_rate)
+        price = local_prices['low'] * price_rate
         if price >= global_prices['high'] * self.max_buy_prices_rate[term]:
             logger.info(
                 f'[{self.product_code} {term} {child_order_cycle} {price}] 過去最高価格に近いため、購入できません。'
