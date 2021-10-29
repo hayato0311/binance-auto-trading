@@ -269,6 +269,7 @@ def obtain_execution_history_from_scratch(product_code, from_aggregate_tradeId, 
     prev_trades_num = len(df_trades_list)
 
     while True:
+        start_time = time.time()
         df_trades_list = get_aggregate_trades_list(product_code, df_trades_list, limit=limit)
 
         target_datetime = df_trades_list.index[0]
@@ -294,19 +295,18 @@ def obtain_execution_history_from_scratch(product_code, from_aggregate_tradeId, 
             target_datetime_list.append(target_datetime)
             target_datetime += datetime.timedelta(days=1)
 
-        if len(df_trades_list) - prev_trades_num < limit:
-            break
-
         save_execution_history(product_code, df_trades_list, p_exe_history_dir, target_datetime_list)
 
+        print(f"last trade datetime: {df_trades_list.index[-1]} tradeId: {df_trades_list.iat[-1,0]}")
+
         if len(df_trades_list) - prev_trades_num < limit:
             break
-
-        print(f"last trade datetime: {df_trades_list.index[-1]}")
 
         df_trades_list = df_trades_list.query('@ed_date <= index')
 
         prev_trades_num = len(df_trades_list)
+        process_time = time.time() - start_time
+        time.sleep(60 - process_time % 60)
 
     logger.debug(f'[{product_code}] 集計データ作成中...')
 

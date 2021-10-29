@@ -5,7 +5,7 @@ from logging import INFO, FileHandler, StreamHandler, basicConfig, getLogger
 from pathlib import Path
 
 import pandas as pd
-# from binance.spot import Spot
+from binance.spot import Spot
 from dateutil.relativedelta import relativedelta
 
 from ai import AI
@@ -415,12 +415,14 @@ def calc_volume(product_code, child_orders):
 
 
 def trading(product_code):
-    # board_state = get_board_state(product_code)
-    # if board_state['state'] != 'RUNNING':
-    #     logger.info(
-    #         f'[{product_code} {board_state["state"]}] 現在取引所は稼働していません。')
-    #     return
 
+    spot_client = Spot(key=os.environ['API_KEY'], secret=os.environ['API_SECRET'])
+
+    exchange_info = spot_client.exchange_info(product_code)
+
+    if exchange_info['symbols'][0]['status'] != 'TRADING':
+        logger.info(f'[{product_code} {exchange_info["symbols"][0]["status"]}] {product_code} は現在取引できません。')
+        return
     current_datetime = datetime.datetime.now(
         datetime.timezone(datetime.timedelta(hours=9)))
 
@@ -430,7 +432,7 @@ def trading(product_code):
     delete_row_data(
         product_code=product_code,
         current_datetime=current_datetime,
-        days=7
+        days=2
     )
 
     logger.info(f'[{product_code}] 不必要な生データの削除完了')
@@ -443,6 +445,7 @@ def trading(product_code):
 
     ai = AI(
         product_code=product_code,
+        exchange_info=exchange_info,
         size_round_digits=int(os.environ.get(f'{product_code}_SIZE_ROUND_DIGITS', 0)),
         min_volume_short=float(os.environ.get(f'{product_code}_SHORT_MIN_VOLUME', 10)),
         max_volume_short=float(os.environ.get(f'{product_code}_SHORT_MAX_VOLUME', 100)),
@@ -476,6 +479,7 @@ def trading(product_code):
 def lambda_handler(event, context):
 
     product_code_list = [
+        'ADAUSDT',
         'SOLUSDT',
     ]
 
@@ -486,15 +490,17 @@ def lambda_handler(event, context):
     for product_code in product_code_list:
         trading(product_code=product_code)
 
-    # obtain_execution_history_from_scratch('SOLUSDT', 124017273, limit=1000)
-
     # =============================================================
 
     # from pprint import pprint
 
     # from dotenv import load_dotenv
     # load_dotenv()
+    # from preprocess import obtain_execution_history_from_scratch
+    # obtain_execution_history_from_scratch('ADAUSDT', 225052771, limit=1000)
+    # from pprint import pprint
 
+    # from binance.spot import Spot
     # client = Spot(key=os.environ['API_KEY'], secret=os.environ['API_SECRET'])
 
     # response = client.new_order(
@@ -513,10 +519,11 @@ def lambda_handler(event, context):
     # response = client.get_orders(symbol='DOTUSDT')
     # pprint(response)
     # print('*' * 50)
+
     # response = client.get_order(symbol='DOTUSDT', orderId=2117099656)
     # pprint(response)
 
-    # response1 = client.agg_trades(symbol='SOLUSDT', fromId=123000000, limit=1000)
+    # response1 = client.agg_trades(symbol='ADAUSDT', limit=1000, fromId=155720000)
     # pprint(response1[-1])
 
     # print(f"st: {datetime.datetime.fromtimestamp(response1[0]['T'] / 1000)} id: {response1[0]['a']}")

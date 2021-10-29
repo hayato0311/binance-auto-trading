@@ -28,6 +28,7 @@ class AI:
     def __init__(self,
                  latest_summary,
                  product_code,
+                 exchange_info,
                  size_round_digits,
                  min_volume_short=20,
                  min_volume_long=20,
@@ -43,7 +44,7 @@ class AI:
         self.product_code = product_code
         self.size_round_digits = size_round_digits
         self.region = region
-        self.key_currency = 'USDT'
+        self.exchange_info = exchange_info
 
         account_info = self.spot_client.account()
         self.commission_rate = account_info['makerCommission'] / 10000
@@ -174,13 +175,6 @@ class AI:
             self.child_orders[term].loc[order_id] = df_child_orders_tmp.loc[order_id]
 
         if self.child_orders[term].at[order_id, 'status'] == 'FILLED':
-            # # 取引手数料を算出
-            # total_commission = self.child_orders[term].at[order_id,
-            #                                               'total_commission']
-            # price = self.child_orders[term].at[order_id, 'price']
-            # self.child_orders[term].at[order_id,
-            #                            'commission'] = price * total_commission
-
             if self.child_orders[term].at[order_id, 'relatedOrderId'] == 'no_id' \
                     or self.child_orders[term].at[order_id, 'side'] == 'SELL':
                 logger.info(
@@ -296,9 +290,9 @@ class AI:
         elif volume > self.max_volume[term]:
             volume = self.max_volume[term]
 
-        if volume > self.free_balances[self.key_currency]:
+        if volume > self.free_balances[self.exchange_info['symbols'][0]['quoteAsset']]:
             logger.info(
-                f'[{self.product_code} {term} {child_order_cycle} {price} {volume}] {self.key_currency} が不足しているため、購入できません。'
+                f"[{self.product_code} {term} {child_order_cycle} {price} {volume}] {self.exchange_info['symbols'][0]['quoteAsset']} が不足しているため、購入できません。"
             )
             return
 
