@@ -98,7 +98,7 @@ def calc_profit(product_code, child_orders, latest_summary):
         rearlized_profit = rearlized_profit_all
         unrealized_profit = unrealized_profit_all
 
-        if len(df_daily_profit) >= 2:
+        if len(df_daily_profit) >= 2 and f'{product_code}_realized_profit' in df_daily_profit.columns and f'{product_code}_unrealized_profit' in df_daily_profit.columns:
             rearlized_profit -= float(df_daily_profit.loc[df_daily_profit.index != current_date, f'{product_code}_realized_profit'].sum())
             unrealized_profit -= float(df_daily_profit.loc[df_daily_profit.index != current_date, f'{product_code}_unrealized_profit'].sum())
 
@@ -290,7 +290,7 @@ def calc_volume(product_code, child_orders):
 
         buy_volume = buy_volume_all
         sell_volume = sell_volume_all
-        if len(df_daily_volume) >= 2:
+        if len(df_daily_volume) >= 2 and f'{product_code}_buy_volume' in df_daily_volume and f'{product_code}_sell_volume' in df_daily_volume:
             buy_volume -= float(df_daily_volume.loc[df_daily_volume.index != current_date, f'{product_code}_buy_volume'].sum())
             sell_volume -= float(df_daily_volume.loc[df_daily_volume.index != current_date, f'{product_code}_sell_volume'].sum())
 
