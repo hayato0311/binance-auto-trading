@@ -244,7 +244,6 @@ class AI:
         # キャンセル処理
         # ----------------------------------------------------------------
         # cancel
-        order_id = 10
         response = self.spot_client.cancel_order(symbol=self.product_code, orderId=order_id)
 
         if response['status'] == 'CANCELED':
