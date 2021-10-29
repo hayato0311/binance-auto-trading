@@ -53,6 +53,8 @@ class AI:
         for balance in account_info['balances']:
             self.free_balances.update({balance['asset']: float(balance['free'])})
 
+        self.price_round_digits = int(os.environ[f"{self.exchange_info['symbols'][0]['quoteAsset']}_PRICE_ROUND_DIGITS"])
+
         p_child_orders_dir = Path(CHILD_ORDERS_DIR)
         p_child_orders_dir = p_child_orders_dir.joinpath(self.product_code)
         self.p_child_orders_path = {
@@ -267,7 +269,7 @@ class AI:
             # 1 - local_prices['low'] / global_prices['high']) ** 2 +
             # self.max_buy_prices_rate[term]
 
-        price = local_prices['low'] * price_rate
+        price = round(local_prices['low'] * price_rate, self.price_round_digits)
         if price >= global_prices['high'] * self.max_buy_prices_rate[term]:
             logger.info(
                 f'[{self.product_code} {term} {child_order_cycle} {price}] 過去最高価格に近いため、購入できません。'
