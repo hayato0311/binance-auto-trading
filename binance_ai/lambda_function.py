@@ -481,6 +481,7 @@ def lambda_handler(event, context):
     product_code_list = [
         'ADAUSDT',
         'SOLUSDT',
+        'SYSUSDT'
     ]
 
     if not LOCAL:
