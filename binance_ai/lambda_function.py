@@ -497,7 +497,8 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
-    # obtain_execution_history_from_scratch('ADAUSDT', 225052771, limit=1000)
+    # obtain_execution_history_from_scratch('SYSUSDT', 910633, limit=1000)
+
     # from pprint import pprint
 
     # from binance.spot import Spot
@@ -523,7 +524,7 @@ def lambda_handler(event, context):
     # response = client.get_order(symbol='DOTUSDT', orderId=2117099656)
     # pprint(response)
 
-    # response1 = client.agg_trades(symbol='ADAUSDT', limit=1000, fromId=155720000)
+    # response1 = client.agg_trades(symbol='SYSUSDT', limit=1000, fromId=0)
     # pprint(response1[-1])
 
     # print(f"st: {datetime.datetime.fromtimestamp(response1[0]['T'] / 1000)} id: {response1[0]['a']}")

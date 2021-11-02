@@ -28,10 +28,11 @@ def get_aggregate_trades_list(symbol, df_pre_latest_aggregate_trades, from_aggre
     aggregate_trades_list = []
 
     spot_client = Spot(key=os.environ['API_KEY'], secret=os.environ['API_SECRET'])
-    if not from_aggregate_tradeId:
-        from_aggregate_tradeId = df_pre_latest_aggregate_trades.iat[-1, 0]
-    elif df_pre_latest_aggregate_trades.empty and not from_aggregate_tradeId:
-        raise Exception('df_pre_latest_aggregate_trades and from_aggregate_tradeId are vacant.')
+    if from_aggregate_tradeId is None:
+        if not df_pre_latest_aggregate_trades.empty:
+            from_aggregate_tradeId = df_pre_latest_aggregate_trades.iat[-1, 0]
+        else:
+            raise Exception('df_pre_latest_aggregate_trades and from_aggregate_tradeId are vacant.')
 
     start_timestamp = -1
     if not df_pre_latest_aggregate_trades.empty:
@@ -151,8 +152,8 @@ def make_summary_from_scratch(p_file):
 
     df_summary = pd.DataFrame({
         'open_price': [float(df['open_price'].values[0])],
-        'high_price': [int(df['high_price'].max())],
-        'low_price': [int(df['low_price'].min())],
+        'high_price': [float(df['high_price'].max())],
+        'low_price': [float(df['low_price'].min())],
         'close_price': [float(df['close_price'].values[-1])],
         'total_size': [float(df['total_size'].sum())]
     })
@@ -262,7 +263,7 @@ def make_summary(product_code, p_dir, daily=False):
     return not df_summary.empty
 
 
-def obtain_execution_history_from_scratch(product_code, from_aggregate_tradeId, limit=1000):
+def obtain_execution_history_from_scratch(product_code, from_aggregate_tradeId=0, limit=1000):
     p_exe_history_dir = Path(EXECUTION_HISTORY_DIR)
 
     df_trades_list = get_aggregate_trades_list(product_code, pd.DataFrame(), from_aggregate_tradeId=from_aggregate_tradeId, limit=limit)
