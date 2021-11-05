@@ -480,6 +480,9 @@ def lambda_handler(event, context):
 
     product_code_list = [
         'ADAUSDT',
+        'AUTOUSDT',
+        'CHRUSDT',
+        'REEFUSDT',
         'SOLUSDT',
         'SYSUSDT'
     ]
@@ -498,7 +501,12 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
-    # obtain_execution_history_from_scratch('SYSUSDT', 910633, limit=1000)
+    # obtain_execution_history_from_scratch('REEFUSDT', 0, limit=1000)
+    # obtain_execution_history_from_scratch('AUTOUSDT', 0, limit=1000)
+
+    # for p_file in list(sorted(Path('execute_history').joinpath('REEFUSDT').glob('**/*row.csv')))[:-1]:
+    #     print(p_file)
+    #     # p_file.unlink()
 
     # from pprint import pprint
 
