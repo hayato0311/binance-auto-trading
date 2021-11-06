@@ -167,7 +167,8 @@ def make_summary_from_csv(
         product_code,
         p_dir='',
         summary_path_list=[],
-        save=True):
+        save=True,
+        read_all_data=False):
     if p_dir != '':
         logger.debug(f'[{p_dir}] 集計データ更新中...')
         p_summary_save_path = p_dir.joinpath('summary.csv')
@@ -188,11 +189,14 @@ def make_summary_from_csv(
     if p_dir != '':
         if path_exists(p_summary_save_path):
             df_summary = read_csv(str(p_summary_save_path))
+            print(df_summary.dtypes)
     if summary_path_list == [] and p_dir != '':
         if REF_LOCAL:
             p_summary_path_list = p_dir.glob('*/summary.csv')
             p_summary_path_list = sorted(p_summary_path_list)
-            if len(p_summary_path_list) == 1:
+            if read_all_data:
+                summary_path_list = [str(p_path) for p_path in p_summary_path_list]
+            elif len(p_summary_path_list) == 1:
                 summary_path_list = [
                     str(p_summary_path_list[0])
                 ]
@@ -202,7 +206,7 @@ def make_summary_from_csv(
                 ]
         else:
             day_dir_list = s3.listdir(str(p_dir))
-            if len(day_dir_list) <= 2:
+            if len(day_dir_list) <= 2 or read_all_data:
                 target_day_dir_list = day_dir_list
             else:
                 target_day_dir_list = day_dir_list[-2:]
@@ -249,7 +253,7 @@ def make_summary_from_csv(
     return df_summary
 
 
-def make_summary(product_code, p_dir, daily=False):
+def make_summary(product_code, p_dir, daily=False, read_all_data=False):
     if daily:
         p_1m_file = p_dir.joinpath('1m.csv')
         df_summary = make_summary_from_scratch(p_1m_file)
@@ -258,7 +262,8 @@ def make_summary(product_code, p_dir, daily=False):
             product_code=product_code,
             p_dir=p_dir,
             summary_path_list=[],
-            save=True
+            save=True,
+            read_all_data=read_all_data
         )
     return not df_summary.empty
 
@@ -315,7 +320,8 @@ def obtain_execution_history_from_scratch(product_code, from_aggregate_tradeId=0
         product_code,
         year=2021,
         month=-1,
-        day=-1
+        day=-1,
+        read_all_data=True
     )
 
     logger.debug(f'[{product_code}] 集計データ作成完了')
@@ -593,19 +599,19 @@ def obtain_latest_summary(product_code, region='Asia/Tokyo'):
     return latest_summary
 
 
-def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
+def gen_execution_summaries(product_code, year=2021, month=-1, day=-1, read_all_data=False):
     logger.debug(f'[{product_code} {year} {month} {day}] 集計データ作成開始')
     p_save_base_dir = Path(EXECUTION_HISTORY_DIR)
     p_product_dir = p_save_base_dir.joinpath(product_code)
     p_year_dir = p_product_dir.joinpath(str(year))
     if month == -1:
         if REF_LOCAL:
-            for p_target_month_dir in p_year_dir.glob('*'):
+            for p_target_month_dir in sorted(p_year_dir.glob('*')):
                 if not p_target_month_dir.is_dir():
                     continue
                 p_month_dir = p_year_dir.joinpath(str(p_target_month_dir.name))
                 if day == -1:
-                    for p_target_day_dir in p_month_dir.glob('*'):
+                    for p_target_day_dir in sorted(p_month_dir.glob('*')):
                         if p_target_day_dir.is_dir():
                             p_day_dir = p_month_dir.joinpath(
                                 str(p_target_day_dir.name))
@@ -619,10 +625,10 @@ def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
                     if not success:
                         logger.debug(f'[{p_day_dir}] データが存在しないため、集計を作成できませんでした。')
                         return
-                make_summary(product_code, p_month_dir)
+                make_summary(product_code, p_month_dir, read_all_data=read_all_data)
         else:
             target_month_dir_list = s3.listdir(str(p_year_dir))
-            for target_month_dir in target_month_dir_list:
+            for target_month_dir in sorted(target_month_dir_list):
                 if target_month_dir.endswith('summary.csv'):
                     continue
                 dir_list = target_month_dir.split('/')
@@ -632,7 +638,7 @@ def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
                 )
                 if day == -1:
                     target_day_dir_list = s3.listdir(str(p_month_dir))
-                    for target_day_dir in target_day_dir_list:
+                    for target_day_dir in sorted(target_day_dir_list):
                         if not target_day_dir.endswith('summary.csv'):
                             dir_list = target_day_dir.split('/')
                             dir_list.remove('')
@@ -649,13 +655,13 @@ def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
                     if not success:
                         logger.debug(f'[{p_day_dir}] データが存在しないため、集計を作成できませんでした。')
                         return
-                make_summary(product_code, p_month_dir)
+                make_summary(product_code, p_month_dir, read_all_data=read_all_data)
 
     else:
         p_month_dir = p_year_dir.joinpath(str(month))
         if day == -1:
             if REF_LOCAL:
-                for p_target_day_dir in p_month_dir.glob('*'):
+                for p_target_day_dir in sorted(p_month_dir.glob('*')):
                     if p_target_day_dir.is_dir():
                         p_day_dir = p_month_dir.joinpath(
                             str(p_target_day_dir.name)
@@ -666,7 +672,7 @@ def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
                             return
             else:
                 target_day_dir_list = s3.listdir(str(p_month_dir))
-                for target_day_dir in target_day_dir_list:
+                for target_day_dir in sorted(target_day_dir_list):
                     if not target_day_dir.endswith('summary.csv'):
                         p_day_dir = p_month_dir.joinpath(
                             target_day_dir.split('/')[-2]
@@ -681,9 +687,9 @@ def gen_execution_summaries(product_code, year=2021, month=-1, day=-1):
             if not success:
                 logger.debug(f'[{p_day_dir}] データが存在しないため、集計を作成できませんでした。')
                 return
-        success = make_summary(product_code, p_month_dir)
-    success = make_summary(product_code, p_year_dir)
-    success = make_summary(product_code, p_product_dir)
+        success = make_summary(product_code, p_month_dir, read_all_data=read_all_data)
+    success = make_summary(product_code, p_year_dir, read_all_data=read_all_data)
+    success = make_summary(product_code, p_product_dir, read_all_data=read_all_data)
 
     logger.debug(f'[{product_code} {year} {month} {day}] 集計データ作成終了')
 
