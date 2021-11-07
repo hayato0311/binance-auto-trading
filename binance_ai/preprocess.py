@@ -51,10 +51,10 @@ def get_aggregate_trades_list(symbol, df_pre_latest_aggregate_trades, from_aggre
         elif new_aggregate_trades_list[-1]['T'] - start_timestamp > 259200000:
             break
         from_aggregate_tradeId += limit
-        if request_count == 500:
+        if request_count == 250:
             process_time = time.time() - start_time
-            if process_time < 30:
-                time.sleep(30 - process_time)
+            if process_time < 15:
+                time.sleep(15 - process_time)
             start_time = time.time()
             request_count = 0
     df_latest_aggregate_trades = pd.DataFrame(aggregate_trades_list)
@@ -188,7 +188,6 @@ def make_summary_from_csv(
     if p_dir != '':
         if path_exists(p_summary_save_path):
             df_summary = read_csv(str(p_summary_save_path))
-            print(df_summary.dtypes)
     if summary_path_list == [] and p_dir != '':
         if REF_LOCAL:
             p_summary_path_list = p_dir.glob('*/summary.csv')
