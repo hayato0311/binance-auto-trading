@@ -482,6 +482,7 @@ def lambda_handler(event, context):
         'ADAUSDT',
         'AUTOUSDT',
         'CHRUSDT',
+        'RAREUSDT',
         'REEFUSDT',
         'SOLUSDT',
         'SYSUSDT'
@@ -501,12 +502,13 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
+    # obtain_execution_history_from_scratch('RAREUSDT', 0, limit=1000)
     # obtain_execution_history_from_scratch('ADAUSDT', 228348778, limit=1000)
     # obtain_execution_history_from_scratch('AUTOUSDT', 2671382, limit=1000)
     # obtain_execution_history_from_scratch('SOLUSDT', 136165741, limit=1000)
     # obtain_execution_history_from_scratch('SYSUSDT', 1097564, limit=1000)
 
-    # for p_file in list(sorted(Path('execute_history').joinpath('SYSUSDT').glob('**/*row.csv')))[:-1]:
+    # for p_file in list(sorted(Path('execute_history').joinpath('RAREUSDT').glob('**/*row.csv')))[:-1]:
     #     print(p_file)
     #     # p_file.unlink()
 
