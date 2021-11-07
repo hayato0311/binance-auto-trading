@@ -51,13 +51,12 @@ def get_aggregate_trades_list(symbol, df_pre_latest_aggregate_trades, from_aggre
         elif new_aggregate_trades_list[-1]['T'] - start_timestamp > 259200000:
             break
         from_aggregate_tradeId += limit
-        if request_count == 1000:
+        if request_count == 500:
             process_time = time.time() - start_time
-            if process_time < 60:
-                time.sleep(60 - process_time)
+            if process_time < 30:
+                time.sleep(30 - process_time)
             start_time = time.time()
             request_count = 0
-
     df_latest_aggregate_trades = pd.DataFrame(aggregate_trades_list)
     df_latest_aggregate_trades.columns = ['aggregate_tradeId', 'price', 'size', 'first_tradeId', 'last_tradeId', 'timestamp', 'maker', 'best_price_match']
 

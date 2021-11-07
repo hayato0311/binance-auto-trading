@@ -482,7 +482,7 @@ def lambda_handler(event, context):
         'ADAUSDT',
         'AUTOUSDT',
         'CHRUSDT',
-        'RAREUSDT',
+        # 'RAREUSDT',
         'REEFUSDT',
         'SOLUSDT',
         'SYSUSDT'
