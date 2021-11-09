@@ -426,8 +426,6 @@ def trading(product_code):
     current_datetime = datetime.datetime.now(
         datetime.timezone(datetime.timedelta(hours=9)))
 
-    print(current_datetime)
-
     logger.info(f'[{product_code}] 不必要な生データを削除中...')
     delete_row_data(
         product_code=product_code,
