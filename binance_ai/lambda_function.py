@@ -446,13 +446,7 @@ def trading(product_code):
     ai = AI(
         product_code=product_code,
         exchange_info=exchange_info,
-        size_round_digits=int(os.environ.get(f'{product_code}_SIZE_ROUND_DIGITS', 0)),
-        min_volume_short=float(os.environ.get(f'{product_code}_SHORT_MIN_VOLUME', 10)),
-        max_volume_short=float(os.environ.get(f'{product_code}_SHORT_MAX_VOLUME', 100)),
-        min_volume_long=float(os.environ.get(f'{product_code}_LONG_MIN_VOLUME', 10)),
-        max_volume_long=float(os.environ.get(f'{product_code}_LONG_MAX_VOLUME', 100)),
-        time_diff=9,
-        latest_summary=latest_summary
+        latest_summary=latest_summary,
     )
 
     logger.info(f'[{product_code}] 注文中...')
@@ -502,7 +496,7 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
-    # obtain_execution_history_from_scratch('RAREUSDT', 0, limit=1000)
+    # obtain_execution_history_from_scratch('RAREUSDT', 1152176, limit=1000)
     # obtain_execution_history_from_scratch('ADAUSDT', 228348778, limit=1000)
     # obtain_execution_history_from_scratch('AUTOUSDT', 2671382, limit=1000)
     # obtain_execution_history_from_scratch('SOLUSDT', 136165741, limit=1000)

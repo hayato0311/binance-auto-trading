@@ -25,24 +25,12 @@ class AI:
 
     """
 
-    def __init__(self,
-                 latest_summary,
-                 product_code,
-                 exchange_info,
-                 size_round_digits,
-                 min_volume_short=20,
-                 min_volume_long=20,
-                 max_volume_short=100,
-                 max_volume_long=300,
-                 time_diff=9,
-                 region='Asia/Tokyo',
-                 bucket_name='',
-                 key_currency='USDT'):
+    def __init__(self, product_code, exchange_info, latest_summary, region='Asia/Tokyo'):
 
         self.spot_client = Spot(key=os.environ['API_KEY'], secret=os.environ['API_SECRET'])
 
         self.product_code = product_code
-        self.size_round_digits = size_round_digits
+        self.size_round_digits = int(os.environ.get(f'{product_code}_SIZE_ROUND_DIGITS', 0))
         self.region = region
         self.exchange_info = exchange_info
 
@@ -94,13 +82,18 @@ class AI:
         self.datetime_references['monthly'] = self.datetime_references['now'] - datetime.timedelta(days=31)
 
         self.min_volume = {
-            'long': min_volume_long,
-            'short': min_volume_short,
+            'long': float(os.environ.get(f'{product_code}_LONG_MIN_VOLUME', 10)),
+            'short': float(os.environ.get(f'{product_code}_SHORT_MIN_VOLUME', 10)),
         }
 
         self.max_volume = {
-            'long': max_volume_long,
-            'short': max_volume_short,
+            'long': float(os.environ.get(f'{product_code}_LONG_MAX_VOLUME', 100)),
+            'short': float(os.environ.get(f'{product_code}_SHORT_MAX_VOLUME', 100)),
+        }
+
+        self.cut_loss_rate = {
+            'long': float(os.environ.get(f'{product_code}_CUT_LOSS_RATE_LONG', 0.95)),
+            'short': float(os.environ.get(f'{product_code}_CUT_LOSS_RATE_SHORT', 0.95)),
         }
 
         self.max_buy_prices_rate = {
@@ -397,7 +390,7 @@ class AI:
                 child_order_cycle=child_order_cycle,
             )
 
-    def _sell(self, term, child_order_cycle, rate):
+    def _sell(self, term, child_order_cycle, rate, cut_loss=False):
         if self.child_orders[term].empty:
             logger.info(
                 f'[{self.product_code} {term} {child_order_cycle}] 買い注文がないため、売り注文はできません。'
@@ -421,14 +414,24 @@ class AI:
                     price = self.latest_summary['SELL']['6h']['price']['high']
                 size = round(float(related_buy_order['size'].values[i]), 3)
 
-                response = self.spot_client.new_order(
-                    symbol=self.product_code,
-                    side='SELL',
-                    type='LIMIT',
-                    timeInForce='GTC',
-                    quantity=size,
-                    price=price
-                )
+                if not cut_loss:
+                    response = self.spot_client.new_order(
+                        symbol=self.product_code,
+                        side='SELL',
+                        type='LIMIT',
+                        timeInForce='GTC',
+                        quantity=size,
+                        price=price
+                    )
+                else:
+                    response = self.spot_client.new_order(
+                        symbol=self.product_code,
+                        side='SELL',
+                        type='STOP_LOSS',
+                        timeInForce='GTC',
+                        quantity=size,
+                        stopPrice=price
+                    )
 
                 if response['status'] == 'NEW':
                     print('================================================================')
@@ -475,6 +478,11 @@ class AI:
                 child_order_cycle='daily',
                 local_prices=self.latest_summary['1d']['price']
             )
+            self._sell(
+                term='long',
+                child_order_cycle='daily',
+                rate=self.cut_loss_rate['long'],
+                cut_loss=True)
 
         if int(os.environ.get('LONG_WEEKLY', 1)):
             # weekly
@@ -483,6 +491,11 @@ class AI:
                 child_order_cycle='weekly',
                 local_prices=self.latest_summary['1w']['price']
             )
+            self._sell(
+                term='long',
+                child_order_cycle='weekly',
+                rate=self.cut_loss_rate['long'],
+                cut_loss=True)
 
         if int(os.environ.get('LONG_MONTHLY', 0)):
             # monthly
@@ -491,9 +504,13 @@ class AI:
                 child_order_cycle='monthly',
                 local_prices=self.latest_summary['1m']['price']
             )
+            self._sell(
+                term='long',
+                child_order_cycle='monthly',
+                rate=self.cut_loss_rate['long'],
+                cut_loss=True)
 
     def short_term(self):
-
         # 最新情報を取得
         self.update_child_orders(term='short')
 
