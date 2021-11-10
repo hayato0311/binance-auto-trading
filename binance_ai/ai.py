@@ -430,7 +430,6 @@ class AI:
                         symbol=self.product_code,
                         side='SELL',
                         type='STOP_LOSS',
-                        timeInForce='GTC',
                         quantity=size,
                         stopPrice=price
                     )
