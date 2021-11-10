@@ -414,7 +414,7 @@ class AI:
                 price = round(related_buy_order['price'].values[i] * rate, self.price_round_digits)
                 if price < self.latest_summary['6h']['price']['high'] and not cut_loss:
                     price = round(self.latest_summary['6h']['price']['high'], self.price_round_digits)
-                size = round(related_buy_order['size'].values[i], self.size_round_digits)
+                size = round(related_buy_order['size'].values[i] * (1 - self.commission_rate) * 0.999, self.size_round_digits)
 
                 if not cut_loss:
                     response = self.spot_client.new_order(
@@ -433,13 +433,18 @@ class AI:
                         timeInForce='GTC',
                         quantity=size,
                         price=price,
-                        stopPrice=price
+                        stopPrice=price,
+                        newOrderRespType='FULL'
                     )
 
                 if response['status'] == 'NEW':
                     print('================================================================')
-                    logger.info(f'[{self.product_code} {term} {child_order_cycle} {price} {size} {response["orderId"]} '
-                                + f'{int(int(related_buy_order["price"].values[i]) * (rate-1)) * size}] 売り注文に成功しました！！')
+                    if not cut_loss:
+                        logger.info(f'[{self.product_code} {term} {child_order_cycle} {price} {size} {response["orderId"]} '
+                                    + f'{int(int(related_buy_order["price"].values[i]) * (rate-1)) * size}] 売り注文に成功しました！！')
+                    else:
+                        logger.info(f'[{self.product_code} {term} {child_order_cycle} {price} {size} {response["orderId"]} '
+                                    + f'{int(int(related_buy_order["price"].values[i]) * (rate-1)) * size}] 損切り用の売り注文に成功しました！！')
                     print('================================================================')
 
                     self.update_child_orders(
