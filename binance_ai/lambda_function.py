@@ -494,7 +494,7 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
-    # obtain_execution_history_from_scratch('RAREUSDT', 1152176, limit=1000)
+    # obtain_execution_history_from_scratch('RAREUSDT', 1166900, limit=1000)
     # obtain_execution_history_from_scratch('ADAUSDT', 228348778, limit=1000)
     # obtain_execution_history_from_scratch('AUTOUSDT', 2671382, limit=1000)
     # obtain_execution_history_from_scratch('SOLUSDT', 136165741, limit=1000)
@@ -526,7 +526,8 @@ def lambda_handler(event, context):
     # pprint(response)
     # print('*' * 50)
 
-    # response = client.get_order(symbol='DOTUSDT', orderId=2117099656)
+    # response = client.my_trades(symbol='RAREUSDT', orderId=9995403)
+    # response = client.get_order(symbol='RAREUSDT', orderId=9995403)
     # pprint(response)
 
     # response1 = client.agg_trades(symbol='SYSUSDT', limit=1000, fromId=0)

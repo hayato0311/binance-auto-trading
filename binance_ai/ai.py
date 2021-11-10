@@ -122,31 +122,30 @@ class AI:
         while df_child_orders_tmp.empty:
             response = self.spot_client.get_order(symbol=self.product_code, orderId=order_id)
 
-            if response['status'] == 'NEW':
-                df_child_orders_tmp = pd.DataFrame([response])
-                df_child_orders_tmp = df_child_orders_tmp.rename(columns={'origQty': 'size'})
+            df_child_orders_tmp = pd.DataFrame([response])
+            df_child_orders_tmp = df_child_orders_tmp.rename(columns={'origQty': 'size'})
 
-                df_child_orders_tmp = df_child_orders_tmp.astype({
-                    'symbol': str,
-                    'orderId': int,
-                    'clientOrderId': str,
-                    'orderListId': int,
-                    'price': float,
-                    'size': float,
-                    'executedQty': float,
-                    'cummulativeQuoteQty': float,
-                    'status': str,
-                    'timeInForce': str,
-                    'type': str,
-                    'side': str,
-                    'stopPrice': float,
-                    'icebergQty': float,
-                    'isWorking': bool,
-                    'origQuoteOrderQty': float
-                })
+            df_child_orders_tmp = df_child_orders_tmp.astype({
+                'symbol': str,
+                'orderId': int,
+                'clientOrderId': str,
+                'orderListId': int,
+                'price': float,
+                'size': float,
+                'executedQty': float,
+                'cummulativeQuoteQty': float,
+                'status': str,
+                'timeInForce': str,
+                'type': str,
+                'side': str,
+                'stopPrice': float,
+                'icebergQty': float,
+                'isWorking': bool,
+                'origQuoteOrderQty': float
+            })
 
-                df_child_orders_tmp['time'] = series_unix_to_tz(df_child_orders_tmp['time'], unit='ms', utc=True, region=self.region)
-                df_child_orders_tmp['updateTime'] = series_unix_to_tz(df_child_orders_tmp['updateTime'], unit='ms', utc=True, region=self.region)
+            df_child_orders_tmp['time'] = series_unix_to_tz(df_child_orders_tmp['time'], unit='ms', utc=True, region=self.region)
+            df_child_orders_tmp['updateTime'] = series_unix_to_tz(df_child_orders_tmp['updateTime'], unit='ms', utc=True, region=self.region)
 
             if time.time() - start_time > 5:
                 logger.warning(f'{order_id} はすでに存在しないため、ファイルから削除します。')
