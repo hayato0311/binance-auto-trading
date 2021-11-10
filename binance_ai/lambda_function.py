@@ -474,6 +474,7 @@ def lambda_handler(event, context):
         'ADAUSDT',
         'AUTOUSDT',
         'CHRUSDT',
+        'ENSUSDT',
         'RAREUSDT',
         'REEFUSDT',
         'SOLUSDT',
@@ -494,7 +495,7 @@ def lambda_handler(event, context):
     # from dotenv import load_dotenv
     # load_dotenv()
     # from preprocess import obtain_execution_history_from_scratch
-    # obtain_execution_history_from_scratch('RAREUSDT', 1166900, limit=1000)
+    # obtain_execution_history_from_scratch('ENSUSDT', 0, limit=1000)
     # obtain_execution_history_from_scratch('ADAUSDT', 228348778, limit=1000)
     # obtain_execution_history_from_scratch('AUTOUSDT', 2671382, limit=1000)
     # obtain_execution_history_from_scratch('SOLUSDT', 136165741, limit=1000)
