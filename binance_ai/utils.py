@@ -36,3 +36,10 @@ def series_unix_to_tz(series, unit=None, utc=None, convert=True, region='Asia/To
     else:
         series = series.dt.tz_localize(region)
     return series
+
+
+def rm_file(p_path):
+    if REF_LOCAL:
+        return p_path.unlink()
+    else:
+        return s3.delete_file(str(p_path))

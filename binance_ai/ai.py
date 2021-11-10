@@ -8,7 +8,7 @@ import pandas as pd
 from binance.spot import Spot
 
 from manage import CHILD_ORDERS_DIR, LOCAL, REF_LOCAL
-from utils import df_to_csv, path_exists, read_csv, series_unix_to_tz
+from utils import df_to_csv, path_exists, read_csv, rm_file, series_unix_to_tz
 
 if LOCAL:
     from dotenv import load_dotenv
@@ -107,7 +107,10 @@ class AI:
             inplace=True
         )
         # csvファイルを更新
-        df_to_csv(self.p_child_orders_path[term], self.child_orders[term], index=True)
+        if len(self.child_orders[term]) == 0:
+            rm_file(self.p_child_orders_path[term])
+        else:
+            df_to_csv(self.p_child_orders_path[term], self.child_orders[term], index=True)
         logger.debug(f'{str(self.p_child_orders_path[term])} が更新されました。')
 
     def load_latest_child_orders(self,
