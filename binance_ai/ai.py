@@ -411,10 +411,10 @@ class AI:
                     f'[{self.product_code} {term} {child_order_cycle}] 同じフラグを持つ約定済みの買い注文が2つ以上あります。'
                 )
             for i in range(len(related_buy_order)):
-                price = int(int(related_buy_order['price'].values[i]) * rate)
-                if price < self.latest_summary['6h']['price']['high']:
-                    price = self.latest_summary['6h']['price']['high']
-                size = round(float(related_buy_order['size'].values[i]), 3)
+                price = round(related_buy_order['price'].values[i] * rate, self.price_round_digits)
+                if price < self.latest_summary['6h']['price']['high'] and not cut_loss:
+                    price = round(self.latest_summary['6h']['price']['high'], self.price_round_digits)
+                size = round(related_buy_order['size'].values[i], self.size_round_digits)
 
                 if not cut_loss:
                     response = self.spot_client.new_order(
@@ -429,8 +429,10 @@ class AI:
                     response = self.spot_client.new_order(
                         symbol=self.product_code,
                         side='SELL',
-                        type='STOP_LOSS',
+                        type='STOP_LOSS_LIMIT',
+                        timeInForce='GTC',
                         quantity=size,
+                        price=price,
                         stopPrice=price
                     )
 
