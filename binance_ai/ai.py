@@ -190,7 +190,7 @@ class AI:
                 profit = sell_price * sell_size - buy_price * buy_size
                 profit -= sell_commission + buy_commission
 
-                logger.info(f'[{self.product_code} {term} {child_order_cycle}] {profit}円の利益が発生しました。')
+                logger.info(f'[{self.product_code} {term} {child_order_cycle}] {profit}ドルの利益が発生しました。')
 
                 self.child_orders[term].at[order_id, 'profit'] = profit
                 self.child_orders[term]['cumsumProfit'] = self.child_orders[term]['profit'].cumsum()
@@ -256,8 +256,9 @@ class AI:
         if 1 - local_prices['low'] / global_prices['high'] > 1 / 2:
             price_rate = 1
         else:
-            price_rate = -4 * (1 - self.max_buy_prices_rate[term]) * (
-                1 - local_prices['low'] / global_prices['high']) ** 2 + 1
+            # price_rate = -0.4 * (0.5 - local_prices['low'] / global_prices['high']) ** 2 + 1
+            price_rate = -4 * (1 - self.max_buy_prices_rate[term]) * (0.5 - local_prices['low'] / global_prices['high']) ** 2 + 1
+
             # price_rate = 2 * (1 - self.max_buy_prices_rate[term]) * (
             #     1 - local_prices['low'] / global_prices['high']) + self.max_buy_prices_rate[term]
             # price_rate = 4 * (1 - self.max_buy_prices_rate[term]) * (
@@ -265,6 +266,7 @@ class AI:
             # self.max_buy_prices_rate[term]
 
         price = round(local_prices['low'] * price_rate, self.price_round_digits)
+
         if price >= global_prices['high'] * self.max_buy_prices_rate[term]:
             logger.info(
                 f'[{self.product_code} {term} {child_order_cycle} {price}] 過去最高価格に近いため、購入できません。'
@@ -382,8 +384,7 @@ class AI:
         if response['status'] == 'NEW':
             print('================================================================')
             logger.info(
-                f'[{self.product_code} {term} {child_order_cycle} ${price} {size} ${volume}'
-                + f'{response["orderId"]}] 買い注文に成功しました!!'
+                f'[{self.product_code} {term} {child_order_cycle} ${price} {size} ${volume}' + f'{response["orderId"]}] 買い注文に成功しました!!'
             )
             print('================================================================')
             self.update_child_orders(
@@ -414,7 +415,7 @@ class AI:
                 price = round(related_buy_order['price'].values[i] * rate, self.price_round_digits)
                 if price < self.latest_summary['6h']['price']['high'] and not cut_loss:
                     price = round(self.latest_summary['6h']['price']['high'], self.price_round_digits)
-                size = round(related_buy_order['size'].values[i] * (1 - self.commission_rate) * 0.999, self.size_round_digits)
+                size = round(related_buy_order['size'].values[i] * (1 - self.commission_rate) - 10 ** -self.size_round_digits, self.size_round_digits)
 
                 if not cut_loss:
                     response = self.spot_client.new_order(
